@@ -94,7 +94,7 @@ impl<'a> ObjectClient<'a> {
     ) -> crate::Result<Object>
     where
         S: TryStream + Send + Sync + 'static,
-        S::Error: Into<Box<dyn std::error::Error + Send + Sync>>,
+        S::Error: Into<Box<dyn std::error::Error + Send + Sync>> + Sync,
         bytes::Bytes: From<S::Ok>,
     {
         use reqwest::header::{CONTENT_LENGTH, CONTENT_TYPE};
