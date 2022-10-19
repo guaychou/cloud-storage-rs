@@ -1,5 +1,5 @@
 use futures_util::{stream, Stream, StreamExt, TryStream, TryStreamExt};
-use reqwest::{Response, StatusCode};
+pub use reqwest::Response as HttpResponse;
 
 use crate::{
     error::GoogleResponse,
@@ -262,7 +262,12 @@ impl<'a> ObjectClient<'a> {
         }
     }
 
-    async fn download_response(&self, bucket: &str, file_name: &str) -> crate::Result<Response> {
+    /// Download the content of the object, returning the full reqwest::Response
+    pub async fn download_response(
+        &self,
+        bucket: &str,
+        file_name: &str,
+    ) -> crate::Result<HttpResponse> {
         let url = format!(
             "{}/b/{}/o/{}?alt=media",
             crate::BASE_URL,
@@ -277,10 +282,10 @@ impl<'a> ObjectClient<'a> {
             .send()
             .await?;
 
-        if resp.status() == StatusCode::NOT_FOUND {
+        if !resp.status().is_success() {
             Err(crate::Error::Other(resp.text().await?))
         } else {
-            Ok(resp.error_for_status()?)
+            Ok(resp)
         }
     }
 
@@ -338,6 +343,7 @@ impl<'a> ObjectClient<'a> {
     )> {
         let response = self.download_response(bucket, file_name).await?;
         let content_length = response.content_length();
+
         let bytes = response.bytes_stream().map_err(crate::Error::from);
         Ok((content_length, bytes))
     }
