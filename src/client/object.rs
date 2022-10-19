@@ -332,10 +332,14 @@ impl<'a> ObjectClient<'a> {
         &self,
         bucket: &str,
         file_name: &str,
-    ) -> crate::Result<impl Stream<Item = crate::Result<crate::Bytes>> + Unpin> {
+    ) -> crate::Result<(
+        Option<u64>,
+        impl Stream<Item = crate::Result<crate::Bytes>> + Unpin,
+    )> {
         let response = self.download_response(bucket, file_name).await?;
+        let content_length = response.content_length();
         let bytes = response.bytes_stream().map_err(crate::Error::from);
-        Ok(bytes)
+        Ok((content_length, bytes))
     }
 
     /// Download the content of the object with the specified name in the specified bucket, without

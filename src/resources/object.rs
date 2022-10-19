@@ -306,7 +306,7 @@ impl Object {
     ) -> crate::Result<Self>
     where
         S: TryStream + Send + Sync + 'static,
-        S::Error: Into<Box<dyn std::error::Error + Send + Sync>>,
+        S::Error: Into<Box<dyn std::error::Error + Send + Sync>> + Sync,
         bytes::Bytes: From<S::Ok>,
     {
         crate::CLOUD_CLIENT
@@ -484,7 +484,10 @@ impl Object {
     pub async fn download_bytes_stream(
         bucket: &str,
         file_name: &str,
-    ) -> crate::Result<impl Stream<Item = crate::Result<crate::Bytes>> + Unpin> {
+    ) -> crate::Result<(
+        Option<u64>,
+        impl Stream<Item = crate::Result<crate::Bytes>> + Unpin,
+    )> {
         crate::CLOUD_CLIENT
             .object()
             .download_bytes_stream(bucket, file_name)
