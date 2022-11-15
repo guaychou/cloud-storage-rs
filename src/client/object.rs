@@ -107,7 +107,8 @@ impl<'a> ObjectClient<'a> {
         );
         let mut headers = self.0.get_headers().await?;
         headers.insert(CONTENT_TYPE, mime_type.parse()?);
-        if let Some(length) = length.into() {
+        let length: Option<u64> = length.into();
+        if let Some(length) = length {
             headers.insert(CONTENT_LENGTH, length.into());
         }
 
