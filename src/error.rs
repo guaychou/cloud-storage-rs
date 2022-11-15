@@ -43,17 +43,17 @@ impl std::fmt::Display for Error {
                 error.fmt(f)?;
             }
             #[cfg(feature = "ring")]
-            Pem(error) => {
+            Error::Pem(error) => {
                 f.write_str("Pem: ")?;
                 error.fmt(f)?;
             }
             #[cfg(feature = "ring")]
-            KeyRejected(error) => {
+            Error::KeyRejected(error) => {
                 f.write_str("KeyRejected: ")?;
                 error.fmt(f)?;
             }
             #[cfg(feature = "ring")]
-            Signing(error) => {
+            Error::Signing(error) => {
                 f.write_str("Signing: ")?;
                 error.fmt(f)?;
             }
