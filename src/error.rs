@@ -33,7 +33,49 @@ impl Error {
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
-        writeln!(f, "{:?}", self)
+        match self {
+            Error::Google(error) => {
+                f.write_str("Google: ")?;
+                error.fmt(f)?;
+            }
+            Error::Reqwest(error) => {
+                f.write_str("Reqwest: ")?;
+                error.fmt(f)?;
+            }
+            #[cfg(feature = "ring")]
+            Pem(error) => {
+                f.write_str("Pem: ")?;
+                error.fmt(f)?;
+            }
+            #[cfg(feature = "ring")]
+            KeyRejected(error) => {
+                f.write_str("KeyRejected: ")?;
+                error.fmt(f)?;
+            }
+            #[cfg(feature = "ring")]
+            Signing(error) => {
+                f.write_str("Signing: ")?;
+                error.fmt(f)?;
+            }
+            #[cfg(feature = "openssl")]
+            Error::Ssl(error) => {
+                f.write_str("Ssl: ")?;
+                error.fmt(f)?;
+            }
+            Error::Jwt(error) => {
+                f.write_str("Jwt: ")?;
+                error.fmt(f)?;
+            }
+            Error::Serialization(error) => {
+                f.write_str("Serialization: ")?;
+                error.fmt(f)?;
+            }
+            Error::Other(error) => {
+                f.write_str("Other: ")?;
+                error.fmt(f)?;
+            }
+        }
+        Ok(())
     }
 }
 
