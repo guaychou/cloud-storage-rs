@@ -1,4 +1,5 @@
 use futures_util::{stream, Stream, StreamExt, TryStream, TryStreamExt};
+use reqwest::header::HeaderValue;
 pub use reqwest::Response as HttpResponse;
 
 use crate::{
@@ -97,7 +98,7 @@ impl<'a> ObjectClient<'a> {
         S::Error: Into<Box<dyn std::error::Error + Send + Sync>> + Sync,
         bytes::Bytes: From<S::Ok>,
     {
-        use reqwest::header::{CONTENT_LENGTH, CONTENT_TYPE};
+        use reqwest::header::{CONTENT_RANGE, CONTENT_TYPE};
 
         let url = &format!(
             "{}/{}/o?uploadType=media&name={}",
@@ -109,7 +110,8 @@ impl<'a> ObjectClient<'a> {
         headers.insert(CONTENT_TYPE, mime_type.parse()?);
         let length: Option<u64> = length.into();
         if let Some(length) = length {
-            headers.insert(CONTENT_LENGTH, length.into());
+            let range = format!("0-{}/{}", length, length);
+            headers.insert(CONTENT_RANGE, HeaderValue::from_bytes(range.as_bytes())?);
         }
 
         let body = reqwest::Body::wrap_stream(stream);
