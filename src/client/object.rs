@@ -275,13 +275,9 @@ impl<'a> ObjectClient<'a> {
             percent_encode(bucket),
             percent_encode(file_name),
         );
-        let resp = self
-            .0
-            .client
-            .get(&url)
-            .headers(self.0.get_headers().await?)
-            .send()
-            .await?;
+        let headers = self.0.get_headers().await?;
+        eprintln!("Requesting URL {} with headers {:?}", url, headers);
+        let resp = self.0.client.get(&url).headers(headers).send().await?;
 
         if !resp.status().is_success() {
             Err(crate::Error::Other(resp.text().await?))
